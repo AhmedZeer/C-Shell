@@ -40,16 +40,24 @@ char ** lsh_split_line(char *line){
 
   if(!tokens){
     fprintf(stderr, "ALLOCATION FAILURE!\n");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
   token = strtok( line, LSH_TOK_DELEIM);
   while( token != NULL ){ 
     tokes[pos] = token;
     pos++;
     if( pos >= bufsize ){
-      bufsize += LSH_TOK_BUFSIZE
+      bufsize += LSH_TOK_BUFSIZE;
+      tokens = realloc( tokens, bufsize * sizeof( * char ));
+      if( !tokens ){
+        fprintf(stderr, "%LSH: ERROR ALLOCATION\n")
+        exit(EXIT_FAILURE);
+      }
     }
+    token = strtok(NULL, LSH_TOK_DELEIM);
   }
+  token[pos] = NULL;
+  return tokens;
 }
 
 
