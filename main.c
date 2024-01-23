@@ -60,7 +60,13 @@ char ** lsh_split_line(char *line){
   return tokens;
 }
 
+int lsh_execute(char **args){
+  pid_t pid, wpid;
+  int status;
 
+
+
+}
 
 
 (void) lsh_loop(void){
