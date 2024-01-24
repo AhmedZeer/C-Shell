@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 #define EXIT_SUCCESS 0 
 #define EXIT_FAILURE 0 
 #define LSH_RL_BUFSIZE 1024
@@ -63,10 +64,24 @@ char ** lsh_split_line(char *line){
 int lsh_execute(char **args){
   pid_t pid, wpid;
   int status;
-
-
-
+  
+  pid = fork();
+  if ( pid == 0 ){
+    if ( execvp(args[0], args) == -1){
+      perror("lsh");
+    }
+    exit(EXIT_FAILURE);
+  } else if ( pid < 0 ) {
+    //forking error
+    perror("lsh");
+  } else {
+    do {
+      wpid = waitpid(pid, &status, WUNTRACTED)
+    } while ( !WIFEXITED(status) && !WIFSIGNALED(status) )
+  }
+  return 1;
 }
+
 
 
 (void) lsh_loop(void){
