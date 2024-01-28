@@ -7,6 +7,10 @@
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELEIM " \t\n\a\r"
 
+int lsh_cd(char **args);
+int lsh_help(char **args);
+int lsh_exit(char **args);
+
 char* lsh_read_line(){
   int bufsize = LSH_RL_BUFSIZE;
   int pos = 0;
@@ -61,7 +65,7 @@ char ** lsh_split_line(char *line){
   return tokens;
 }
 
-int lsh_execute(char **args){
+int lsh_launch(char **args){
   pid_t pid, wpid;
   int status;
   
