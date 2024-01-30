@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/wait.h>
-#define EXIT_SUCCESS 0 
-#define EXIT_FAILURE 0 
 #define LSH_RL_BUFSIZE 1024
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELEIM " \t\n\a\r"
@@ -39,9 +38,9 @@ char* lsh_read_line(){
   }
 }
 
-char ** lsh_split_line(char *line){
+char **lsh_split_line(char *line){
   int bufsize = LSH_TOK_BUFSIZE, pos = 0;
-  char **tokens = malloc( bufsize * sizeof(*char));
+  char **tokens = malloc( bufsize * sizeof(char*));
   char *token;
 
   if(!tokens){
@@ -50,19 +49,19 @@ char ** lsh_split_line(char *line){
   }
   token = strtok( line, LSH_TOK_DELEIM);
   while( token != NULL ){ 
-    tokes[pos] = token;
+    tokens[pos] = token;
     pos++;
     if( pos >= bufsize ){
       bufsize += LSH_TOK_BUFSIZE;
-      tokens = realloc( tokens, bufsize * sizeof( * char ));
+      tokens = realloc( tokens, bufsize * sizeof(char*));
       if( !tokens ){
-        fprintf(stderr, "%LSH: ERROR ALLOCATION\n")
+        fprintf(stderr, "LSH: ERROR ALLOCATION\n");
         exit(EXIT_FAILURE);
       }
     }
     token = strtok(NULL, LSH_TOK_DELEIM);
   }
-  token[pos] = NULL;
+  tokens[pos] = NULL;
   return tokens;
 }
 
@@ -81,8 +80,8 @@ int lsh_launch(char **args){
     perror("lsh");
   } else {
     do {
-      wpid = waitpid(pid, &status, WUNTRACTED)
-    } while ( !WIFEXITED(status) && !WIFSIGNALED(status) )
+      wpid = waitpid(pid, &status, WUNTRACED);
+    } while ( !WIFEXITED(status) && !WIFSIGNALED(status));
   }
   return 1;
 }
@@ -95,28 +94,28 @@ char *builtin_str[] = {
   "exit"
 };
 
-char *(builtin_func[])(char **) = {
-  &lsh_exit,
+int (*builtin_func[])(char **) = {
   &lsh_cd,
-  &lsh_help
+  &lsh_help,
+  &lsh_exit
 };
 
 int lsh_sum(){
   return sizeof(builtin_str) / sizeof(char*);
 }
 
-int lsh_cd( **args ){
-  if ( args[1] == 1 ){
-    fprintf(stderr, "lsh: expected argument to \"cd\" \n")
+int lsh_cd( char **args ){
+  if ( args[1] == NULL ){
+    fprintf(stderr, "lsh: expected argument to \"cd\" \n");
   } else {
     if( args[1] != 0 ){
-      fprintf(stderr, "%lsh\n");
+      perror("lsh");
     }
   }
   return 1;
 }
 
-int lsh_help(){
+int lsh_help( char **args ){
   int i;
   printf("Welcome To Shell's Help.\n");
   printf("Type profram names and arguments and hit enter.\n");
@@ -131,7 +130,7 @@ int lsh_help(){
 
 
 int lsh_exit(char** args){
-  return 0;
+  return 1;
 }
 
 int lsh_execute( char** args ){
@@ -142,13 +141,13 @@ int lsh_execute( char** args ){
 
   for( i = 0 ; i < lsh_sum() ; i++ ){
     if( strcmp(args[0], builtin_str[i]) == 0 ){
-      return (*builtin_func(i)(args));
+      return (*builtin_func[i])(args);
     }
   }
   return lsh_launch(args);
 }
 
-(void) lsh_loop(void){
+void lsh_loop(){
   char *line;
   char **args;
   int status;
@@ -163,16 +162,13 @@ int lsh_execute( char** args ){
     free(args);
   } while(status);
 
-}
+};
 
 int main(){
 
-  /*load config files*/
 
-  /*run comand loop*/
   lsh_loop();
 
-  /*perform any shut-down or cleanup*/
 
 
   return EXIT_SUCCESS;
