@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/wait.h>
 #define EXIT_SUCCESS 0 
 #define EXIT_FAILURE 0 
@@ -87,6 +88,65 @@ int lsh_launch(char **args){
 }
 
 
+char *builtin_str[] = {
+
+  "cd",
+  "help",
+  "exit"
+};
+
+char *(builtin_func[])(char **) = {
+  &lsh_exit,
+  &lsh_cd,
+  &lsh_help
+};
+
+int lsh_sum(){
+  return sizeof(builtin_str) / sizeof(char*);
+}
+
+int lsh_cd( **args ){
+  if ( args[1] == 1 ){
+    fprintf(stderr, "lsh: expected argument to \"cd\" \n")
+  } else {
+    if( args[1] != 0 ){
+      fprintf(stderr, "%lsh\n");
+    }
+  }
+  return 1;
+}
+
+int lsh_help(){
+  int i;
+  printf("Welcome To Shell's Help.\n");
+  printf("Type profram names and arguments and hit enter.\n");
+  printf("These are builtins:\n");
+
+  for( i = 0 ; i < lsh_sum() ; i++ ){
+    printf("  %s\n", builtin_str[i]);
+  }
+
+  return 1;
+}
+
+
+int lsh_exit(char** args){
+  return 0;
+}
+
+int lsh_execute( char** args ){
+  int i;
+  if( args[0] == NULL ){
+    return 1;
+  }
+
+  for( i = 0 ; i < lsh_sum() ; i++ ){
+    if( strcmp(args[0], builtin_str[i]) == 0 ){
+      return (*builtin_func(i)(args));
+    }
+  }
+  return lsh_launch(args);
+}
 
 (void) lsh_loop(void){
   char *line;
